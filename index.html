@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Starter Site — Secure, Fast, SEO Friendly</title>
+
+  <meta name="description" content="Fast, secure, SEO-friendly starter template with contact form, reCAPTCHA v2, and Facebook Pixel." />
+  <link rel="canonical" href="https://www.example.com/" />
+  <meta name="robots" content="index,follow" />
+  <meta property="og:title" content="Starter Site" />
+  <meta property="og:description" content="Fast, secure, SEO-friendly starter." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.example.com/" />
+  <meta property="og:image" content="https://www.example.com/og-image.jpg" />
+  <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
+  <link rel="preconnect" href="https://connect.facebook.net" crossorigin>
+  <link rel="dns-prefetch" href="https://www.google.com">
+
+  
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+  <style>
+    :root{--brand:#0a84ff;--ink:#0b1324;--muted:#6b7280;--bg:#f8fafc;--ok:#16a34a;--warn:#f59e0b;--err:#ef4444}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+    header{position:sticky;top:0;background:#fff;border-bottom:1px solid #e5e7eb;z-index:10}
+    .container{max-width:1000px;margin-inline:auto;padding:clamp(12px,2vw,20px)}
+    .row{display:grid;grid-template-columns:1fr;gap:20px}
+    @media(min-width:900px){.row{grid-template-columns:1.3fr .7fr}}
+    h1,h2{margin:0 0 8px}
+    h1{font-size:clamp(22px,3.4vw,34px)}
+    h2{font-size:clamp(18px,2.2vw,24px)}
+    p{margin:0 0 12px;color:var(--muted)}
+    .card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;box-shadow:0 1px 2px rgba(0,0,0,.04);padding:20px}
+    .btn{display:inline-flex;align-items:center;gap:8px;background:var(--brand);color:#fff;border:none;border-radius:999px;padding:10px 16px;font-weight:600;cursor:pointer}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    form{display:grid;gap:12px}
+    input,textarea{width:100%;padding:10px 12px;border:1px solid #e5e7eb;border-radius:10px;font:inherit}
+    input:focus,textarea:focus{outline:2px solid rgba(10,132,255,.25);border-color:var(--brand)}
+    .hint{font-size:12px;color:var(--muted)}
+    .chip{display:inline-block;padding:4px 10px;border-radius:999px;background:#f1f5f9;color:#0b1324;font-size:12px}
+    .toast{position:fixed;right:16px;bottom:16px;background:#111827;color:#fff;padding:12px 14px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s}
+    .toast.show{opacity:1;transform:translateY(0)}
+    .badge{font-size:12px;padding:3px 8px;border-radius:8px;background:#ecfeff;color:#0369a1;border:1px solid #bae6fd}
+    .list{display:grid;gap:10px}
+    .list li{display:flex;gap:10px;align-items:flex-start}
+    .list .ok{color:var(--ok)}.list .warn{color:var(--warn)}.list .err{color:var(--err)}
+    footer{margin-top:40px;font-size:13px;color:var(--muted)}
+    .hero-img{width:100%;height:auto;border-radius:16px;border:1px solid #e5e7eb}
+  </style>
+
+  
+  <script>
+    
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init','YOUR_PIXEL_ID');
+    fbq('track','PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none" alt=""
+    src="https://www.facebook.com/tr?id=YOUR_PIXEL_ID&ev=PageView&noscript=1"/></noscript>
+
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+  <script defer id="app-script">
+  const Toast = (() => {
+    const el = document.createElement('div');
+    el.className = 'toast';
+    document.addEventListener('DOMContentLoaded', () => document.body.appendChild(el));
+    return {
+      show(msg){ el.textContent = msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'), 2800); }
+    }
+  })();
+
+  
+  async function handleContactSubmit(e){
+    e.preventDefault();
+    const form = e.currentTarget;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true; submitBtn.textContent = 'Sending…';
+
+    
+    const name = form.name.value.trim();
+    const email = form.email.value.trim();
+    const message = form.message.value.trim();
+    if(!name || !email || !message){
+      Toast.show('Please fill all fields.');
+      submitBtn.disabled = false; submitBtn.textContent = 'Send Message';
+      return;
+    }
+
+    
+    const captchaResponse = grecaptcha.getResponse();
+    if(!captchaResponse){
+      Toast.show('Please complete the CAPTCHA.');
+      submitBtn.disabled = false; submitBtn.textContent = 'Send Message';
+      return;
+    }
+
+    
+    try{
+      const res = await fetch('/api/contact', { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, message, captcha: captchaResponse })
+      });
+      if(!res.ok) throw new Error('Network error');
+      Toast.show('Message sent! We will get back to you.');
+      form.reset();
+      grecaptcha.reset();
+    }catch(err){
+      console.error(err);
+      Toast.show('Could not send. Please try again.');
+    }finally{
+      submitBtn.disabled = false; submitBtn.textContent = 'Send Message';
+    }
+  }
+
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector('#contact-form');
+    form.addEventListener('submit', handleContactSubmit);
+
+    if('loading' in HTMLImageElement.prototype) return; 
+    const imgs = document.querySelectorAll('img[data-src]');
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting){
+          const img = entry.target; img.src = img.dataset.src; io.unobserve(img);
+        }
+      })
+    });
+    imgs.forEach(img => io.observe(img));
+  });
+
+  
+  (function(){
+    try{ new PerformanceObserver(list => {
+      for(const entry of list.getEntries()){
+        if(entry.name === 'first-contentful-paint'){
+          console.log('FCP(ms):', Math.round(entry.startTime));
+        }
+      }
+    }).observe({ type:'paint', buffered:true }); }catch(e){}
+  })();
+  </script>
+</head>
+
+<body>
+  <header>
+    <div class="container" style="display:flex;gap:16px;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:10px">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l9 6-9 6-9-6 9-6zm0 6l9 6-9 6-9-6 9-6z" stroke="currentColor" stroke-width="1.5"/></svg>
+        <strong>Starter Site</strong>
+      </div>
+      <nav style="display:flex;gap:14px">
+        <a href="#features" class="chip">Features</a>
+        <a href="#contact" class="chip">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="row" style="margin-top:16px">
+      <div class="card">
+        <h1>Fast, Secure, SEO‑friendly Template</h1>
+        <p>Includes reCAPTCHA v2 on contact form, Meta Pixel, Open Graph, lazy images, and performance best practices.</p>
+        <ul class="list" style="margin-top:10px">
+          <li><span class="ok">✔</span> reCAPTCHA v2 (Checkbox) integrated on submit</li>
+          <li><span class="ok">✔</span> Client-side validation and fetch to backend</li>
+          <li><span class="ok">✔</span> SEO tags + Open Graph + Canonical</li>
+          <li><span class="ok">✔</span> Lazy images + preconnect + defer scripts</li>
+          <li><span class="ok">✔</span> Pixel snippet ready</li>
+        </ul>
+      </div>
+      <aside class="card">
+        <h2>Deploying Securely</h2>
+        <p><span class="badge">Tips</span> Use free SSL (Let's Encrypt) on your host and force HTTPS with a 301 redirect. Configure SPF, DKIM, & DMARC for email deliverability.</p>
+      </aside>
+    </section>
+
+    <section id="features" class="row">
+      <div class="card">
+        <h2>Demo Image (Lazy)</h2>
+        <p class="hint">This image uses native <code>loading="lazy"</code>. Provide real images in production.</p>
+        <img class="hero-img" src="https://picsum.photos/1200/600" loading="lazy" width="1200" height="600" alt="Demo" />
+      </div>
+      <div class="card">
+        <h2>Speed Checklist</h2>
+        <ul class="list">
+          <li><span class="ok">✓</span> Minify CSS/JS & inline critical CSS</li>
+          <li><span class="ok">✓</span> Compress images (WebP/AVIF)</li>
+          <li><span class="ok">✓</span> Enable server caching & Gzip/Brotli</li>
+          <li><span class="ok">✓</span> Use CDN for assets</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="contact" class="row">
+      <div class="card">
+        <h2>Contact Us</h2>
+        <form id="contact-form" novalidate>
+          <label>
+            Name
+            <input name="name" type="text" placeholder="Your name" required autocomplete="name" />
+          </label>
+          <label>
+            Email
+            <input name="email" type="email" placeholder="you@example.com" required autocomplete="email" />
+          </label>
+          <label>
+            Message
+            <textarea name="message" rows="5" placeholder="How can we help?" required></textarea>
+          </label>
+
+          
+          <div class="g-recaptcha" data-sitekey="YOUR_SITE_KEY"></div>
+
+          <button class="btn" type="submit">Send Message</button>
+          <p class="hint">By submitting, you agree to our terms and privacy policy.</p>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Server Setup Notes</h2>
+        <ul class="list">
+          <li><span class="ok">•</span> <strong>Email (SMTP):</strong> Use a backend (Node/PHP) to send mail via SMTP (e.g., Gmail, SendGrid). Verify SPF, DKIM, DMARC in DNS.</li>
+          <li><span class="ok">•</span> <strong>SSL/HTTPS:</strong> Enable Let’s Encrypt in hosting panel. Force HTTPS using a 301 redirect.</li>
+          <li><span class="ok">•</span> <strong>Web to App:</strong> Services like webtonative.com can wrap this URL for Play Store/App Store uploads.</li>
+          <li><span class="ok">•</span> <strong>AI Caller:</strong> Build your flows on autocalls.ai and connect your CRM/sheets.</li>
+          <li><span class="ok">•</span> <strong>Disk Usage:</strong> Delete old backups, compress media, and cache bust only when needed.</li>
+          <li><span class="ok">•</span> <strong>Google Merchant:</strong> Verify domain, upload product feed (CSV/API), and fix any policy issues.</li>
+        </ul>
+      </div>
+    </section>
+
+    <footer class="container">
+      <p>© <span id="year"></span> Your Company. All rights reserved.</p>
+      <p class="hint">Replace <code>YOUR_PIXEL_ID</code> and <code>YOUR_SITE_KEY</code>. Point <code>/api/contact</code> to your backend that verifies the reCAPTCHA token and sends email via SMTP.</p>
+      
+    </footer>
+  </main>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
